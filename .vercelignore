@@ -11,6 +11,9 @@ npm-debug.log*
 # Código fuente TypeScript (ya compilado)
 src/
 
+# Archivos compilados intermedios (se copian a api/)
+dist/
+
 # Node modules (Vercel los maneja automáticamente)
 node_modules/
 
