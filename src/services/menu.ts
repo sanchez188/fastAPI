@@ -24,8 +24,9 @@ export class MenuService {
     seccion?: string;
     filtro_tags?: string;
     texto?: string;
+    restaurant_id?: string;
   }): Promise<MenuItem[]> {
-    const { seccion, filtro_tags, texto } = filters;
+    const { seccion, filtro_tags, texto, restaurant_id } = filters;
 
     let query = this.getSupabase().from("menu_items").select("*");
 
@@ -42,6 +43,10 @@ export class MenuService {
       for (const tag of tags) {
         query = query.ilike("etiquetas", `%${tag}%`);
       }
+    }
+
+    if (restaurant_id) {
+      query = query.eq("restaurant_id", restaurant_id);
     }
 
     const { data: items, error } = await query

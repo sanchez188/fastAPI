@@ -48,6 +48,11 @@ const TOOLS_DEFINITIONS = [
           type: "string",
           description: "Buscar por nombre o descripción",
         },
+        restaurant_name: {
+          type: "string",
+          description:
+            "Nombre exacto del restaurante para filtrar menú por restaurante",
+        },
       },
     },
   },
