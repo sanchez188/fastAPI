@@ -23,7 +23,9 @@ export class OrderTools {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+            text: JSON.stringify({
+              error: error instanceof Error ? error.message : String(error),
+            }),
           },
         ],
       };
@@ -49,7 +51,9 @@ export class OrderTools {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+            text: JSON.stringify({
+              error: error instanceof Error ? error.message : String(error),
+            }),
           },
         ],
       };
@@ -70,7 +74,12 @@ export class OrderTools {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ cancelled, orders, scope, motivo: args.motivo }),
+            text: JSON.stringify({
+              cancelled,
+              orders,
+              scope,
+              motivo: args.motivo,
+            }),
           },
         ],
       };
@@ -80,7 +89,9 @@ export class OrderTools {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+            text: JSON.stringify({
+              error: error instanceof Error ? error.message : String(error),
+            }),
           },
         ],
       };
