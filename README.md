@@ -2,7 +2,7 @@
 
 Sistema MCP (Model Context Protocol) para el restaurante Sumo Sushi, construido con **arquitectura verdaderamente modular** usando Fastify.
 
-## ✨ Características,
+## ✨ Características
 
 - 🏗️ **Arquitectura Modular Real** - Código separado por responsabilidades
 - ⚡ **Fastify** - Servidor HTTP de alto rendimiento
