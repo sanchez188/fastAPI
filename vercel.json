@@ -1,23 +1,26 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+  "buildCommand": "npm run vercel-build",
+  "functions": {
+    "dist/vercel-index.js": {
+      "runtime": "@vercel/node@3"
+    },
+    "dist/vercel-mcp.js": {
+      "runtime": "@vercel/node@3"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/mcp",
-      "dest": "/api/mcp.js"
+      "dest": "/dist/vercel-mcp.js"
     },
     {
       "src": "/health",
-      "dest": "/api/index.js"
+      "dest": "/dist/vercel-index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/dist/vercel-index.js"
     }
   ]
 }

@@ -11,7 +11,7 @@
     "start": "node dist/server.js",
     "clean": "rimraf dist",
     "lint": "tsc --noEmit",
-    "vercel-build": "npm run build && cp -r dist/* api/ || xcopy dist api\\ /E /I /Y"
+    "vercel-build": "npm run clean && npm run build"
   },
   "keywords": [
     "mcp",

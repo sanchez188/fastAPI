@@ -1,4 +1,4 @@
-// Vercel Serverless Function Entry Point - Health Check y otras rutas
+// Vercel Serverless Function Entry Point - Health Check y rutas principales
 import Fastify from "fastify";
 import { config } from "dotenv";
 
@@ -20,7 +20,7 @@ async function setupServer() {
 
   await fastify.register(import("@fastify/helmet"));
 
-  // Ruta de health check
+  // Ruta de health check principal
   fastify.get("/", async (request, reply) => {
     return {
       status: "ok",
@@ -29,8 +29,8 @@ async function setupServer() {
       timestamp: new Date().toISOString(),
       endpoints: {
         mcp: "/mcp",
-        health: "/health"
-      }
+        health: "/health",
+      },
     };
   });
 
@@ -48,8 +48,16 @@ async function setupServer() {
 }
 
 // Handler para Vercel
-export default async function handler(req, res) {
-  const server = await setupServer();
-  await server.ready();
-  server.server.emit('request', req, res);
+export default async function handler(req: any, res: any) {
+  try {
+    const server = await setupServer();
+    await server.ready();
+    server.server.emit("request", req, res);
+  } catch (error) {
+    console.error("Error en handler principal:", error);
+    res.status(500).json({
+      error: "Error interno del servidor",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }

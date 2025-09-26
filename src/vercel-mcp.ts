@@ -6,7 +6,7 @@ import { config } from "dotenv";
 config();
 
 // Importar plugins modulares
-import mcpPlugin from "../src/plugins/mcp.js";
+import mcpPlugin from "./plugins/mcp.js";
 
 // Crear instancia de Fastify específica para MCP
 const fastify = Fastify({
@@ -29,14 +29,16 @@ async function setupMCPServer() {
   // Registrar solo la ruta MCP en la raíz para este endpoint
   fastify.all("/", async (request, reply) => {
     // Redirigir a la lógica del MCP
-    const mcpServer = fastify.mcpServer;
-    
+    const mcpServer = (fastify as any).mcpServer;
+
     if (!mcpServer) {
       throw new Error("Servidor MCP no disponible");
     }
 
-    const { StreamableHTTPServerTransport } = await import("@modelcontextprotocol/sdk/server/streamableHttp.js");
-    
+    const { StreamableHTTPServerTransport } = await import(
+      "@modelcontextprotocol/sdk/server/streamableHttp.js"
+    );
+
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
@@ -55,7 +57,7 @@ async function setupMCPServer() {
       await transport.handleRequest(request.raw, reply.raw, request.body);
     } catch (error) {
       console.error("❌ Error en endpoint MCP:", error);
-      
+
       if (!reply.sent) {
         reply.code(500).send({
           error: "Error interno del servidor MCP",
@@ -70,8 +72,16 @@ async function setupMCPServer() {
 }
 
 // Handler para Vercel - endpoint /mcp
-export default async function handler(req, res) {
-  const server = await setupMCPServer();
-  await server.ready();
-  server.server.emit('request', req, res);
+export default async function handler(req: any, res: any) {
+  try {
+    const server = await setupMCPServer();
+    await server.ready();
+    server.server.emit("request", req, res);
+  } catch (error) {
+    console.error("Error en handler MCP:", error);
+    res.status(500).json({
+      error: "Error interno del servidor MCP",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 }

@@ -1,5 +1,4 @@
 # Archivos de desarrollo local
-.env
 *.log
 npm-debug.log*
 
@@ -9,11 +8,8 @@ npm-debug.log*
 .DS_Store
 .vscode/
 
-# Archivos de build TypeScript locales
-build/
-dist/
-*.js
-*.js.map
+# Código fuente TypeScript (ya compilado)
+src/
 
 # Node modules (Vercel los maneja automáticamente)
 node_modules/
