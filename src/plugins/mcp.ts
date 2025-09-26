@@ -12,20 +12,21 @@ import {
 import { menuTools } from "../tools/menu-tools.js";
 import { orderTools } from "../tools/order-tools.js";
 import { meseroTools } from "../tools/mesero-tools.js";
+import { restaurantService } from "../services/restaurants.js";
 
 // 🎯 Definiciones de herramientas MCP
 const TOOLS_DEFINITIONS = [
   {
     name: "consulta_mesero",
     description:
-      "Consulta general al asistente de Fast API - Responde temas del servidor y API",
+      "Consulta general al mesero - Responde solo temas del restaurante y menú",
     inputSchema: {
       type: "object",
       properties: {
         pregunta: {
           type: "string",
           description:
-            "Pregunta o consulta sobre el servidor, API, endpoints o información general de Fast API",
+            "Pregunta o consulta sobre los restaurantes, menú, pedidos o información general",
         },
       },
       required: ["pregunta"],
@@ -144,6 +145,48 @@ const TOOLS_DEFINITIONS = [
         },
       },
       required: ["id"],
+    },
+  },
+  {
+    name: "consultar_restaurantes",
+    description:
+      "Consultar restaurantes en la base de datos con filtros opcionales como nombre, calificación, métodos de pago, etc.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "Buscar por nombre del restaurante (búsqueda parcial)",
+        },
+        category_id: {
+          type: "string",
+          description: "Filtrar por ID de categoría específica",
+        },
+        rating_min: {
+          type: "number",
+          description: "Calificación mínima (0-5)",
+        },
+        rating_max: {
+          type: "number",
+          description: "Calificación máxima (0-5)",
+        },
+        payment_method: {
+          type: "string",
+          description: "Filtrar por método de pago específico",
+        },
+        service_mode: {
+          type: "string",
+          description: "Filtrar por modo de servicio específico",
+        },
+        restaurant_id: {
+          type: "string",
+          description: "Obtener un restaurante específico por su ID único",
+        },
+        limit: {
+          type: "number",
+          description: "Límite de resultados a devolver (por defecto 10)",
+        },
+      },
     },
   },
 ] as const;
@@ -368,6 +411,15 @@ async function mcpPlugin(fastify: FastifyInstance) {
             if (!args || !(args as any).id)
               throw new Error("Se requiere un ID de documento");
             return await handleFetch((args as any).id);
+
+          case "consultar_restaurantes":
+            const restaurantArgs = args as any;
+            // Si se proporciona restaurant_id, obtener restaurante específico
+            if (restaurantArgs?.restaurant_id) {
+              return await restaurantService.getRestaurantById(restaurantArgs.restaurant_id);
+            }
+            // Sino, hacer búsqueda con filtros
+            return await restaurantService.getRestaurants(restaurantArgs || {});
 
           default:
             throw new Error(`Herramienta desconocida: ${name}`);

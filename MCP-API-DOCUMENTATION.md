@@ -14,7 +14,7 @@
 
 ## � Resumen de Herramientas
 
-Tu servidor MCP incluye **8 herramientas** divididas en estas categorías:
+Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 
 ### 🎯 Herramientas Base del Protocolo MCP:
 
@@ -34,6 +34,10 @@ Tu servidor MCP incluye **8 herramientas** divididas en estas categorías:
 
 9. `search` - Búsqueda general en el servidor
 10. `fetch` - Obtener contenido completo por ID
+
+### 🏪 Herramientas de Base de Datos:
+
+11. `consultar_restaurantes` - Consultar restaurantes con filtros avanzados
 
 ---
 
@@ -493,6 +497,86 @@ Tu servidor MCP incluye **8 herramientas** divididas en estas categorías:
   },
   "jsonrpc": "2.0",
   "id": 10
+}
+```
+
+---
+
+### 9. `consultar_restaurantes`
+**Descripción**: Consultar restaurantes en la base de datos con filtros opcionales como nombre, calificación, métodos de pago, etc.
+
+**Parámetros para búsqueda general**:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 11,
+  "method": "tools/call",
+  "params": {
+    "name": "consultar_restaurantes",
+    "arguments": {
+      "name": "pizza",
+      "rating_min": 4,
+      "payment_method": "tarjeta",
+      "limit": 5
+    }
+  }
+}
+```
+
+**Parámetros para restaurante específico**:
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 12,
+  "method": "tools/call",
+  "params": {
+    "name": "consultar_restaurantes",
+    "arguments": {
+      "restaurant_id": "123e4567-e89b-12d3-a456-426614174000"
+    }
+  }
+}
+```
+
+**Parámetros opcionales**:
+- `name` (string): Buscar por nombre del restaurante (búsqueda parcial)
+- `category_id` (string): Filtrar por ID de categoría específica
+- `rating_min` (number): Calificación mínima (0-5)
+- `rating_max` (number): Calificación máxima (0-5)
+- `payment_method` (string): Filtrar por método de pago específico
+- `service_mode` (string): Filtrar por modo de servicio específico
+- `restaurant_id` (string): Obtener un restaurante específico por su ID único
+- `limit` (number): Límite de resultados a devolver (por defecto 10)
+
+**Respuesta para búsqueda general**:
+```json
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "📋 **Restaurantes Encontrados** (3 resultados)\n\n🏪 **Pizza Palace** ⭐ 4.5/5\n📞 2479-1234\n📍 Centro de San José...\n\n---\n\n🏪 **Italian Corner** ⭐ 4.2/5..."
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 11
+}
+```
+
+**Respuesta para restaurante específico**:
+```json
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "🏪 **Pizza Palace** ⭐ 4.5/5\n\n📞 **Teléfono:** 2479-1234\n📍 **Dirección:** Centro de San José\n🕐 **Horarios:** Lun-Dom: 11:00-22:00\n💳 **Métodos de Pago:** Efectivo, Tarjeta..."
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 12
 }
 ```
 
