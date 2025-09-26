@@ -390,8 +390,6 @@ async function mcpPlugin(fastify: FastifyInstance) {
               throw new Error("Argumentos requeridos para cancelar órdenes");
             return await orderTools.cancelarPorCedula(args);
 
-
-
           case "search":
             if (!args || !(args as any).query)
               throw new Error("Se requiere un término de búsqueda");

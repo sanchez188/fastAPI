@@ -92,72 +92,12 @@ export class RestaurantService {
         throw new Error(`Error consultando restaurantes: ${error.message}`);
       }
 
-      if (!data || data.length === 0) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: "🔍 No se encontraron restaurantes con los criterios especificados.",
-            },
-          ],
-        };
-      }
-
-      // Formatear resultados
-      const formattedResults = data.map((restaurant: any) => {
-        const rating = restaurant.rating
-          ? `⭐ ${restaurant.rating}/5`
-          : "⭐ Sin calificación";
-        const phone = restaurant.phone ? `📞 ${restaurant.phone}` : "";
-        const address = restaurant.address ? `📍 ${restaurant.address}` : "";
-        const hours = restaurant.opening_hours
-          ? `🕐 ${restaurant.opening_hours}`
-          : "";
-        const payments =
-          restaurant.payment_methods && restaurant.payment_methods.length > 0
-            ? `💳 ${restaurant.payment_methods.join(", ")}`
-            : "";
-        const services =
-          restaurant.service_modes && restaurant.service_modes.length > 0
-            ? `🛎️ ${restaurant.service_modes.join(", ")}`
-            : "";
-        const email = restaurant.email ? `📧 ${restaurant.email}` : "";
-        const mapsUrl = restaurant.google_maps_url
-          ? `🗺️ ${restaurant.google_maps_url}`
-          : "";
-        const category = restaurant.categories?.name 
-          ? `🏷️ ${restaurant.categories.name}` 
-          : "";
-
-        return `
-🏪 **${restaurant.name}** ${rating}
-${category}
-${phone}
-${address}
-${hours}
-${payments}
-${services}
-${email}
-${mapsUrl}
-🆔 ID: ${restaurant.id}
-        `.trim();
-      });
-
-      const resultText = `
-📋 **Restaurantes Encontrados** (${data.length} resultado${
-        data.length !== 1 ? "s" : ""
-      })
-
-${formattedResults.join("\n\n---\n\n")}
-
-💡 *Tip: Puedes usar filtros como nombre, calificación mínima/máxima, métodos de pago o modos de servicio para refinar tu búsqueda.*
-      `.trim();
-
+      // Devolver datos JSON sin formateo
       return {
         content: [
           {
             type: "text",
-            text: resultText,
+            text: JSON.stringify(data),
           },
         ],
       };
@@ -209,72 +149,12 @@ ${formattedResults.join("\n\n---\n\n")}
         throw new Error(`Error consultando restaurante: ${error.message}`);
       }
 
-      if (!data) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `🔍 No se encontró un restaurante con el ID: ${id}`,
-            },
-          ],
-        };
-      }
-
-      const restaurant = data as any;
-      const rating = restaurant.rating
-        ? `⭐ ${restaurant.rating}/5`
-        : "⭐ Sin calificación";
-      const category = restaurant.categories?.name 
-        ? `🏷️ **Categoría:** ${restaurant.categories.name}` 
-        : "";
-      const phone = restaurant.phone
-        ? `📞 **Teléfono:** ${restaurant.phone}`
-        : "";
-      const address = restaurant.address
-        ? `📍 **Dirección:** ${restaurant.address}`
-        : "";
-      const hours = restaurant.opening_hours
-        ? `🕐 **Horarios:** ${restaurant.opening_hours}`
-        : "";
-      const payments =
-        restaurant.payment_methods && restaurant.payment_methods.length > 0
-          ? `💳 **Métodos de Pago:** ${restaurant.payment_methods.join(", ")}`
-          : "";
-      const services =
-        restaurant.service_modes && restaurant.service_modes.length > 0
-          ? `🛎️ **Servicios:** ${restaurant.service_modes.join(", ")}`
-          : "";
-      const email = restaurant.email ? `📧 **Email:** ${restaurant.email}` : "";
-      const mapsUrl = restaurant.google_maps_url
-        ? `🗺️ **Google Maps:** ${restaurant.google_maps_url}`
-        : "";
-      const created = restaurant.created_at
-        ? `📅 **Creado:** ${new Date(
-            restaurant.created_at
-          ).toLocaleDateString()}`
-        : "";
-
-      const resultText = `
-🏪 **${restaurant.name}** ${rating}
-
-${category}
-${phone}
-${address}
-${hours}
-${payments}
-${services}
-${email}
-${mapsUrl}
-${created}
-
-🆔 **ID:** ${restaurant.id}
-      `.trim();
-
+      // Devolver datos JSON sin formateo
       return {
         content: [
           {
             type: "text",
-            text: resultText,
+            text: JSON.stringify(data),
           },
         ],
       };

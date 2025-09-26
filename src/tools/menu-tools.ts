@@ -81,24 +81,12 @@ export class MenuTools {
     try {
       const items = await menuService.buscarItems(args);
 
-      if (!items || items.length === 0) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: "🔍 No encontré platillos con esos criterios. ¡Prueba con otra búsqueda o pregúntame por algún ingrediente específico! 🍣",
-            },
-          ],
-        };
-      }
-
-      const respuesta = MenuTools.formatearMenuParaMesero(items);
-
+      // Devolver datos JSON sin formateo
       return {
         content: [
           {
             type: "text",
-            text: respuesta,
+            text: JSON.stringify(items),
           },
         ],
       };
