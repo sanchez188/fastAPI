@@ -11,7 +11,7 @@ Sistema MCP (Model Context Protocol) para el restaurante Sumo Sushi, construido 
 - 🛡️ **TypeScript** - Tipado fuerte y desarrollo seguro
 - 🗄️ **Supabase** - Base de datos moderna y escalable
 
-## 🏗️ Estructura del Proyecto
+## 🏗️ Estructura del Proyecto.
 
 ```
 src/
