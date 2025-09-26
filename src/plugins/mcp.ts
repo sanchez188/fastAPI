@@ -18,14 +18,14 @@ const TOOLS_DEFINITIONS = [
   {
     name: "consulta_mesero",
     description:
-      "Consulta general al mesero de Sumo Sushi - Responde solo temas del restaurante y menú",
+      "Consulta general al asistente de Fast API - Responde temas del servidor y API",
     inputSchema: {
       type: "object",
       properties: {
         pregunta: {
           type: "string",
           description:
-            "Pregunta o consulta sobre el restaurante, menú, pedidos o información general de Sumo Sushi",
+            "Pregunta o consulta sobre el servidor, API, endpoints o información general de Fast API",
         },
       },
       required: ["pregunta"],
@@ -122,7 +122,7 @@ async function mcpPlugin(fastify: FastifyInstance) {
   // Crear servidor MCP
   const server = new Server(
     {
-      name: "sumo-sushi-assistant-fastify",
+      name: "fast-api-assistant-fastify",
       version: "3.0.0-modular",
     },
     {

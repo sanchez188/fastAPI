@@ -1,6 +1,6 @@
-// 🏪 Configuración del Restaurante - Fastify Modular
+// 🏪 Configuración del Servidor - Fast API
 export const RestaurantConfig = {
-  NOMBRE_RESTAURANTE: "Sumo Sushi",
+  NOMBRE_RESTAURANTE: "Fast API Server",
   TELEFONO_RESTAURANTE: "2479-5555",
   DIRECCION_CORTA: "Centro de Heredia, 100m este de la Municipalidad",
   GOOGLE_MAPS_URL: "https://maps.google.com/?q=9.998,-84.113",

@@ -1,7 +1,7 @@
 {
-  "name": "sumo-sushi-mcp",
+  "name": "fast-api",
   "version": "3.0.0",
-  "description": "MCP Server para Sumo Sushi - Fastify Modular",
+  "description": "Fast API - MCP Server with Fastify",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
@@ -11,13 +11,13 @@
     "start": "node dist/server.js",
     "clean": "rimraf dist",
     "lint": "tsc --noEmit",
-    "vercel-build": "npm run clean && npm run build && node -e \"const fs=require('fs'); fs.mkdirSync('api', {recursive:true}); fs.copyFileSync('dist/vercel-index.js', 'api/index.js'); fs.copyFileSync('dist/vercel-mcp.js', 'api/mcp.js');\""
+    "render-build": "npm run clean && npm run build"
   },
   "keywords": [
     "mcp",
-    "sumo-sushi",
-    "restaurant",
-    "orders"
+    "fast-api",
+    "fastify",
+    "server"
   ],
   "author": "",
   "license": "ISC",
@@ -30,8 +30,7 @@
     "dotenv": "^17.2.2",
     "fastify": "^5.6.1",
     "fastify-plugin": "^5.0.1",
-    "pino-pretty": "^13.1.1",
-    "vercel": "^48.1.5"
+    "pino-pretty": "^13.1.1"
   },
   "devDependencies": {
     "@types/node": "^20.19.17",

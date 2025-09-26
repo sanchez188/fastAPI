@@ -49,13 +49,13 @@ async function startServer() {
     await fastify.listen({ port, host });
 
     console.log(`
-🎉 ¡Servidor Fastify iniciado exitosamente!
+🎉 ¡Fast API Server iniciado exitosamente!
 
 🌐 URL: http://localhost:${port}
 📡 Endpoint MCP: http://localhost:${port}/mcp
 🩺 Health Check: http://localhost:${port}/health
 
-🍣 Sumo Sushi MCP Server v3.0.0 - Modular Ready!
+⚡ Fast API v3.0.0 - Powered by Fastify!
     `);
   } catch (err) {
     console.error("❌ Error iniciando servidor:", err);
@@ -78,8 +78,8 @@ async function startServer() {
   });
 });
 
-// Iniciar servidor
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Iniciar servidor si es el archivo principal
+if (process.argv[1] && process.argv[1].includes("server.js")) {
   startServer();
 }
 

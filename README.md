@@ -1,12 +1,12 @@
-# 🚀 Sumo Sushi MCP Server - Fastify Modular
+# 🚀 Fast API - MCP Server with Fastify
 
-Sistema MCP (Model Context Protocol) para el restaurante Sumo Sushi, construido con **arquitectura verdaderamente modular** usando Fastify.
+Sistema MCP (Model Context Protocol) construido con **arquitectura verdaderamente modular** usando Fastify.
 
 ## ✨ Características
 
 - 🏗️ **Arquitectura Modular Real** - Código separado por responsabilidades
 - ⚡ **Fastify** - Servidor HTTP de alto rendimiento
-- 🍣 **Gestión Completa** - Menú, órdenes y consultas del restaurante
+- 📡 **API Completa** - Endpoints y funcionalidades del servidor
 - 🔌 **Plugins Modulares** - Sistema extensible de funcionalidades
 - 🛡️ **TypeScript** - Tipado fuerte y desarrollo seguro
 - 🗄️ **Supabase** - Base de datos moderna y escalable
@@ -37,23 +37,26 @@ src/
 
 ### 📋 Requisitos Previos
 
-- Node.js 18+ 
+- Node.js 18+
 - npm o yarn
 
 ### 🔧 Instalación
 
 1. **Clonar repositorio**
+
    ```bash
    git clone <repo-url>
    cd mcp-prueba-agente-v1
    ```
 
 2. **Instalar dependencias**
+
    ```bash
    npm install
    ```
 
 3. **Configurar variables de entorno**
+
    ```bash
    cp .env.example .env
    # Editar .env con tus credenciales de Supabase
@@ -78,7 +81,7 @@ docker run -p 3000:3000 --env-file .env sumo-sushi-mcp
 ## 🛠️ Comandos Disponibles
 
 - `npm run build` - Compilar TypeScript
-- `npm run dev` - Desarrollo con recarga automática 
+- `npm run dev` - Desarrollo con recarga automática
 - `npm start` - Iniciar servidor de producción
 - `npm run clean` - Limpiar archivos compilados
 - `npm run lint` - Verificar tipos TypeScript
@@ -111,6 +114,7 @@ NODE_ENV=production
 ## 📦 Deployment
 
 ### Railway
+
 ```bash
 railway login
 railway init
@@ -119,11 +123,13 @@ railway deploy
 ```
 
 ### DigitalOcean App Platform
+
 1. Conectar repositorio
 2. Configurar variables de entorno
 3. Deploy automático
 
 ### VPS Manual
+
 ```bash
 # En el servidor
 git clone <repo>
@@ -138,13 +144,14 @@ pm2 start dist/server.js --name sumo-sushi-mcp
 ### Agregar Nueva Funcionalidad
 
 1. **Crear servicio** en `src/services/`
-2. **Crear herramientas** en `src/tools/`  
+2. **Crear herramientas** en `src/tools/`
 3. **Registrar en plugin** `src/plugins/mcp.ts`
 4. **Compilar y probar**
 
 ### Arquitectura Modular
 
 La modularidad real permite:
+
 - ✅ Separación clara de responsabilidades
 - ✅ Fácil testing de componentes individuales
 - ✅ Escalabilidad sin límites
@@ -156,4 +163,4 @@ MIT License - Ver `LICENSE` para más detalles.
 
 ---
 
-**🍣 Sumo Sushi MCP Server v3.0.0 - Arquitectura Modular Real** ⚡
+**⚡ Fast API v3.0.0 - Arquitectura Modular Real** 🚀
