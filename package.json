@@ -11,7 +11,7 @@
     "build": "tsc",
     "dev": "npm run build && npm start",
     "dev:watch": "tsc --watch & nodemon dist/server.js",
-    "start": "echo 'Starting Fast API...' && echo 'PWD:' && pwd && echo 'Files:' && ls -la && node dist/server.js",
+    "start": "node dist/server.js",
     "start:diagnose": "node diagnose.js",
     "clean": "rimraf dist",
     "lint": "tsc --noEmit",

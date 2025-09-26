@@ -116,7 +116,197 @@ const TOOLS_DEFINITIONS = [
       properties: {},
     },
   },
+  {
+    name: "search",
+    description:
+      "Buscar contenido en la base de datos del servidor. Devuelve una lista de resultados relevantes",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Término de búsqueda para encontrar contenido relevante",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "fetch",
+    description:
+      "Obtener el contenido completo de un documento o item específico usando su ID único",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id: {
+          type: "string",
+          description: "ID único del documento o item a obtener",
+        },
+      },
+      required: ["id"],
+    },
+  },
 ] as const;
+
+// Función para manejar búsquedas
+async function handleSearch(query: string) {
+  try {
+    // Simular búsqueda en diferentes categorías
+    const results = [];
+
+    // Buscar en el menú
+    const menuResults = await menuTools.buscarMenu({ texto: query });
+    if (menuResults.content && menuResults.content[0]?.text) {
+      results.push({
+        id: `menu_search_${Date.now()}`,
+        title: `Resultados de menú para: "${query}"`,
+        url: "/menu/search",
+        type: "menu",
+      });
+    }
+
+    // Buscar información del restaurante
+    if (
+      query.toLowerCase().includes("restaurante") ||
+      query.toLowerCase().includes("horario") ||
+      query.toLowerCase().includes("ubicacion") ||
+      query.toLowerCase().includes("telefono")
+    ) {
+      results.push({
+        id: `restaurant_info_${Date.now()}`,
+        title: "Información del Restaurante",
+        url: "/restaurant/info",
+        type: "info",
+      });
+    }
+
+    // Buscar órdenes si la query parece una cédula
+    if (query.match(/\d{1}-\d{4}-\d{4}/)) {
+      results.push({
+        id: `orders_${query.replace(/-/g, "")}`,
+        title: `Órdenes para cédula: ${query}`,
+        url: `/orders/${query}`,
+        type: "orders",
+      });
+    }
+
+    // Si no hay resultados específicos, hacer una búsqueda general
+    if (results.length === 0) {
+      results.push({
+        id: `general_${Date.now()}`,
+        title: `Búsqueda general: "${query}"`,
+        url: `/search?q=${encodeURIComponent(query)}`,
+        type: "general",
+      });
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({
+            results: results.map((r) => ({
+              id: r.id,
+              title: r.title,
+              url: r.url,
+            })),
+          }),
+        },
+      ],
+    };
+  } catch (error) {
+    throw new Error(
+      `Error en búsqueda: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
+// Función para obtener contenido específico
+async function handleFetch(id: string) {
+  try {
+    let content = "";
+    let title = "";
+    let url = "";
+    let metadata = {};
+
+    if (id.startsWith("menu_")) {
+      // Obtener información completa del menú
+      const menuData = await menuTools.buscarMenu({});
+      content = menuData.content?.[0]?.text || "Menú no disponible";
+      title = "Menú Completo del Restaurante";
+      url = "/menu";
+      metadata = {
+        type: "menu",
+        sections: ["entrantes", "principales", "postres", "bebidas"],
+      };
+    } else if (id.startsWith("restaurant_info")) {
+      // Obtener información del restaurante
+      const restaurantData = meseroTools.getRestaurantInfo();
+      content =
+        restaurantData.content?.[0]?.text || "Información no disponible";
+      title = "Información del Restaurante";
+      url = "/restaurant/info";
+      metadata = {
+        type: "restaurant_info",
+        contact: true,
+        hours: true,
+        location: true,
+      };
+    } else if (id.startsWith("orders_")) {
+      // Extraer cédula del ID
+      const cedula = id
+        .replace("orders_", "")
+        .replace(/(\d{1})(\d{4})(\d{4})/, "$1-$2-$3");
+      try {
+        const orderData = await orderTools.consultarOrdenesPorCedula({
+          cedula,
+        });
+        content =
+          orderData.content?.[0]?.text ||
+          `No se encontraron órdenes para ${cedula}`;
+        title = `Órdenes de ${cedula}`;
+        url = `/orders/${cedula}`;
+        metadata = { type: "orders", cedula, searchable: true };
+      } catch (error) {
+        content = `Error al consultar órdenes: ${
+          error instanceof Error ? error.message : String(error)
+        }`;
+        title = `Error - Órdenes de ${cedula}`;
+        url = `/orders/${cedula}`;
+        metadata = { type: "orders", cedula, error: true };
+      }
+    } else {
+      // Documento genérico
+      content = `Contenido del documento con ID: ${id}`;
+      title = `Documento ${id}`;
+      url = `/document/${id}`;
+      metadata = { type: "document", id };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({
+            id,
+            title,
+            text: content,
+            url,
+            metadata,
+          }),
+        },
+      ],
+    };
+  } catch (error) {
+    throw new Error(
+      `Error al obtener documento: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
 
 async function mcpPlugin(fastify: FastifyInstance) {
   // Crear servidor MCP
@@ -168,6 +358,16 @@ async function mcpPlugin(fastify: FastifyInstance) {
 
           case "get_restaurant_info":
             return meseroTools.getRestaurantInfo();
+
+          case "search":
+            if (!args || !(args as any).query)
+              throw new Error("Se requiere un término de búsqueda");
+            return await handleSearch((args as any).query);
+
+          case "fetch":
+            if (!args || !(args as any).id)
+              throw new Error("Se requiere un ID de documento");
+            return await handleFetch((args as any).id);
 
           default:
             throw new Error(`Herramienta desconocida: ${name}`);
