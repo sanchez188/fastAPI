@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.env
+*.md
+*.log
+.gitignore
+.vercelignore
+datos-ejemplo-menu.sql
+setup-vscode.ps1
