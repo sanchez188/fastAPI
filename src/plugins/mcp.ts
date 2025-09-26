@@ -109,15 +109,6 @@ const TOOLS_DEFINITIONS = [
     },
   },
   {
-    name: "get_restaurant_info",
-    description:
-      "Obtener información del restaurante (horarios, ubicación, etc.)",
-    inputSchema: {
-      type: "object",
-      properties: {},
-    },
-  },
-  {
     name: "search",
     description:
       "Buscar contenido en la base de datos del servidor. Devuelve una lista de resultados relevantes",
@@ -158,9 +149,9 @@ const TOOLS_DEFINITIONS = [
           type: "string",
           description: "Buscar por nombre del restaurante (búsqueda parcial)",
         },
-        category_id: {
+        category_name: {
           type: "string",
-          description: "Filtrar por ID de categoría específica",
+          description: "Filtrar por nombre de categoría específica",
         },
         rating_min: {
           type: "number",
@@ -399,8 +390,7 @@ async function mcpPlugin(fastify: FastifyInstance) {
               throw new Error("Argumentos requeridos para cancelar órdenes");
             return await orderTools.cancelarPorCedula(args);
 
-          case "get_restaurant_info":
-            return meseroTools.getRestaurantInfo();
+
 
           case "search":
             if (!args || !(args as any).query)
@@ -416,7 +406,9 @@ async function mcpPlugin(fastify: FastifyInstance) {
             const restaurantArgs = args as any;
             // Si se proporciona restaurant_id, obtener restaurante específico
             if (restaurantArgs?.restaurant_id) {
-              return await restaurantService.getRestaurantById(restaurantArgs.restaurant_id);
+              return await restaurantService.getRestaurantById(
+                restaurantArgs.restaurant_id
+              );
             }
             // Sino, hacer búsqueda con filtros
             return await restaurantService.getRestaurants(restaurantArgs || {});

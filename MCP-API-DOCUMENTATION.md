@@ -14,7 +14,7 @@
 
 ## � Resumen de Herramientas
 
-Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
+Tu servidor MCP incluye **8 herramientas** divididas en estas categorías:
 
 ### 🎯 Herramientas Base del Protocolo MCP:
 
@@ -28,16 +28,15 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 5. `crear_orden` - Crear órdenes
 6. `consultar_ordenes_por_cedula` - Consultar órdenes
 7. `cancelar_por_cedula` - Cancelar órdenes
-8. `get_restaurant_info` - Info del restaurante
 
 ### 🔍 Herramientas Estándar MCP:
 
-9. `search` - Búsqueda general en el servidor
-10. `fetch` - Obtener contenido completo por ID
+6. `search` - Búsqueda general en el servidor
+7. `fetch` - Obtener contenido completo por ID
 
 ### 🏪 Herramientas de Base de Datos:
 
-11. `consultar_restaurantes` - Consultar restaurantes con filtros avanzados
+8. `consultar_restaurantes` - Consultar restaurantes con filtros avanzados
 
 ---
 
@@ -377,46 +376,7 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 
 ---
 
-### 6. `get_restaurant_info`
-
-**Descripción**: Obtener información del restaurante (horarios, ubicación, contacto).
-
-**Parámetros**:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 8,
-  "method": "tools/call",
-  "params": {
-    "name": "get_restaurant_info",
-    "arguments": {}
-  }
-}
-```
-
-**Parámetros**: Ninguno requerido.
-
-**Respuesta**:
-
-```json
-{
-  "result": {
-    "content": [
-      {
-        "type": "text",
-        "text": "🏪 Fast API Server\n📞 Teléfono: 2479-5555\n📍 Ubicación: Centro de Heredia..."
-      }
-    ]
-  },
-  "jsonrpc": "2.0",
-  "id": 8
-}
-```
-
----
-
-### 7. `search`
+### 6. `search`
 
 **Descripción**: Buscar contenido en la base de datos del servidor. Devuelve una lista de resultados relevantes.
 
@@ -459,7 +419,7 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 
 ---
 
-### 8. `fetch`
+### 7. `fetch`
 
 **Descripción**: Obtener el contenido completo de un documento o item específico usando su ID único.
 
@@ -502,10 +462,12 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 
 ---
 
-### 9. `consultar_restaurantes`
+### 8. `consultar_restaurantes`
+
 **Descripción**: Consultar restaurantes en la base de datos con filtros opcionales como nombre, calificación, métodos de pago, etc.
 
 **Parámetros para búsqueda general**:
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -524,6 +486,7 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 ```
 
 **Parámetros para restaurante específico**:
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -539,8 +502,9 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 ```
 
 **Parámetros opcionales**:
+
 - `name` (string): Buscar por nombre del restaurante (búsqueda parcial)
-- `category_id` (string): Filtrar por ID de categoría específica
+- `category_name` (string): Filtrar por nombre de categoría específica (ej: "Pizza", "Mexicano", etc.)
 - `rating_min` (number): Calificación mínima (0-5)
 - `rating_max` (number): Calificación máxima (0-5)
 - `payment_method` (string): Filtrar por método de pago específico
@@ -549,6 +513,7 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 - `limit` (number): Límite de resultados a devolver (por defecto 10)
 
 **Respuesta para búsqueda general**:
+
 ```json
 {
   "result": {
@@ -565,6 +530,7 @@ Tu servidor MCP incluye **11 herramientas** divididas en estas categorías:
 ```
 
 **Respuesta para restaurante específico**:
+
 ```json
 {
   "result": {
