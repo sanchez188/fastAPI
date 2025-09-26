@@ -10,7 +10,8 @@
     "dev:watch": "tsc --watch & nodemon dist/server.js",
     "start": "node dist/server.js",
     "clean": "rimraf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "vercel-build": "npm run build && cp -r dist/* api/ || xcopy dist api\\ /E /I /Y"
   },
   "keywords": [
     "mcp",
