@@ -11,7 +11,7 @@ Sistema MCP (Model Context Protocol) construido con **arquitectura verdaderament
 - 🛡️ **TypeScript** - Tipado fuerte y desarrollo seguro
 - 🗄️ **Supabase** - Base de datos moderna y escalable
 
-## 🏗️ Estructura del Proyecto
+## 🏗️ Estructura del Proyecto.
 
 ```
 src/
