@@ -2,7 +2,6 @@
 import fp from "fastify-plugin";
 import { FastifyInstance } from "fastify";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -19,14 +18,14 @@ const TOOLS_DEFINITIONS = [
   {
     name: "consulta_mesero",
     description:
-      "Consulta general al mesero - Responde solo temas del restaurante y menú",
+      "Realiza una consulta conversacional al asistente del restaurante. Envía una pregunta sobre horarios, ubicación, menú, pedidos o cualquier información general del restaurante. La respuesta será un texto informativo, útil para interacción natural con el usuario. Úsalo para obtener datos generales o resolver dudas frecuentes.",
     inputSchema: {
       type: "object",
       properties: {
         pregunta: {
           type: "string",
           description:
-            "Pregunta o consulta sobre los restaurantes, menú, pedidos o información general",
+            "Pregunta en lenguaje natural sobre el restaurante, menú, pedidos, horarios, ubicación, contacto, etc. Ejemplo: '¿Cuál es el horario de atención?'",
         },
       },
       required: ["pregunta"],
@@ -35,80 +34,124 @@ const TOOLS_DEFINITIONS = [
   {
     name: "buscar_menu",
     description:
-      "Buscar items del menú por sección, tags o texto, siempre muestre descripcion, precio y no muestre etiquetas ni ids, con solo dos bullet points",
+      "Busca platillos en el menú del restaurante. Permite filtrar por categoría (seccion), etiquetas (filtro_tags), texto libre (nombre o descripción) y por restaurante específico (restaurant_name). Si se envía restaurant_name, primero busca el restaurante por nombre exacto y luego devuelve solo los platillos asociados a ese restaurante. La respuesta es un array JSON de platillos, cada uno con nombre, descripción, precio, categoría y etiquetas. Úsalo para mostrar el menú filtrado en la app.",
     inputSchema: {
       type: "object",
       properties: {
-        seccion: { type: "string", description: "Categoría del menú" },
+        seccion: {
+          type: "string",
+          description:
+            "Nombre de la categoría del menú para filtrar platillos (ej: 'Entrantes', 'Bebidas').",
+        },
         filtro_tags: {
           type: "string",
-          description: "Tags separados por comas (ej: vegetariano,picante)",
+          description:
+            "Lista de etiquetas separadas por coma para filtrar platillos (ej: 'vegetariano,picante').",
         },
         texto: {
           type: "string",
-          description: "Buscar por nombre o descripción",
+          description:
+            "Texto libre para buscar en nombre o descripción del platillo.",
         },
         restaurant_name: {
           type: "string",
           description:
-            "Nombre exacto del restaurante para filtrar menú por restaurante",
+            "Nombre exacto del restaurante para mostrar solo su menú. Si se envía, se ignoran platillos de otros restaurantes.",
         },
       },
     },
   },
   {
     name: "crear_orden",
-    description: "Crear una nueva orden de pedido",
+    description:
+      "Crea una nueva orden de pedido en el restaurante. Debes enviar la cédula, teléfono, nombre del cliente, lista de items (cada uno con id_item y cantidad), método de pago y notas opcionales. La respuesta es un JSON con la orden creada, el total y el detalle de los items. Úsalo para registrar pedidos y mostrar confirmación al usuario.",
     inputSchema: {
       type: "object",
       properties: {
         cedula: {
           type: "string",
-          description: "Cédula del cliente (formato: 1-1234-5678)",
+          description:
+            "Cédula del cliente (formato: 1-1234-5678) para asociar la orden.",
         },
-        telefono: { type: "string", description: "Teléfono del cliente" },
+        telefono: {
+          type: "string",
+          description: "Teléfono de contacto del cliente.",
+        },
         nombre_cliente: {
           type: "string",
-          description: "Nombre completo del cliente",
+          description: "Nombre completo del cliente que realiza el pedido.",
         },
         items: {
           type: "array",
           items: {
             type: "object",
             properties: {
-              id_item: { type: "string" },
-              qty: { type: "integer" },
-              nombre: { type: "string" },
+              id_item: {
+                type: "string",
+                description: "ID del platillo en el menú.",
+              },
+              qty: {
+                type: "integer",
+                description: "Cantidad solicitada de ese platillo.",
+              },
+              nombre: {
+                type: "string",
+                description:
+                  "Nombre del platillo (opcional, solo informativo).",
+              },
             },
             required: ["id_item", "qty"],
           },
         },
-        metodo_pago: { type: "string", description: "Efectivo o Tarjeta" },
-        notas: { type: "string", description: "Notas adicionales" },
+        metodo_pago: {
+          type: "string",
+          description: "Método de pago: 'Efectivo' o 'Tarjeta'.",
+        },
+        notas: {
+          type: "string",
+          description: "Notas adicionales para la orden (opcional).",
+        },
       },
       required: ["cedula", "telefono", "items"],
     },
   },
   {
     name: "consultar_ordenes_por_cedula",
-    description: "Consultar órdenes existentes por cédula",
+    description:
+      "Consulta todas las órdenes asociadas a una cédula de cliente. Envía la cédula en formato 1-1234-5678. La respuesta es un array JSON con las órdenes encontradas, cada una con su estado, items, fecha y datos del cliente. Úsalo para mostrar historial de pedidos o verificar órdenes previas.",
     inputSchema: {
       type: "object",
       properties: {
-        cedula: { type: "string", description: "Cédula del cliente" },
+        cedula: {
+          type: "string",
+          description: "Cédula del cliente para buscar sus órdenes.",
+        },
       },
       required: ["cedula"],
     },
   },
   {
     name: "cancelar_por_cedula",
-    description: "Cancelar órdenes por cédula",
+    description:
+      "Cancela una o todas las órdenes asociadas a una cédula de cliente. Envía la cédula, el alcance ('ultima' para la más reciente, 'todas' para todas) y el motivo de cancelación. La respuesta es un JSON con el número de órdenes canceladas y el detalle de las órdenes afectadas. Úsalo para gestionar cancelaciones y mostrar confirmación al usuario.",
     inputSchema: {
       type: "object",
       properties: {
-        cedula: { type: "string" },
-        scope: { type: "string", enum: ["ultima", "todas"], default: "ultima" },
-        motivo: { type: "string", description: "Motivo de cancelación" },
+        cedula: {
+          type: "string",
+          description: "Cédula del cliente cuyas órdenes se desean cancelar.",
+        },
+        scope: {
+          type: "string",
+          enum: ["ultima", "todas"],
+          default: "ultima",
+          description:
+            "Alcance de la cancelación: 'ultima' para la más reciente, 'todas' para todas las órdenes.",
+        },
+        motivo: {
+          type: "string",
+          description: "Motivo de la cancelación (opcional, informativo).",
+        },
       },
       required: ["cedula"],
     },
@@ -116,13 +159,14 @@ const TOOLS_DEFINITIONS = [
   {
     name: "search",
     description:
-      "Buscar contenido en la base de datos del servidor. Devuelve una lista de resultados relevantes",
+      "Realiza una búsqueda general en el servidor. Envía un término de búsqueda (query) y recibe una lista de resultados relevantes en formato JSON, que pueden incluir platillos, órdenes, información del restaurante, etc. Úsalo para encontrar cualquier contenido relacionado con el restaurante según el texto ingresado por el usuario.",
     inputSchema: {
       type: "object",
       properties: {
         query: {
           type: "string",
-          description: "Término de búsqueda para encontrar contenido relevante",
+          description:
+            "Texto de búsqueda para encontrar cualquier contenido relevante en el sistema (menú, órdenes, info, etc.).",
         },
       },
       required: ["query"],
@@ -131,13 +175,14 @@ const TOOLS_DEFINITIONS = [
   {
     name: "fetch",
     description:
-      "Obtener el contenido completo de un documento o item específico usando su ID único",
+      "Obtiene el contenido completo de un documento, platillo, orden o cualquier item específico usando su ID único. Envía el parámetro 'id' y recibe el objeto JSON correspondiente. Úsalo para mostrar detalles completos de un elemento seleccionado por el usuario.",
     inputSchema: {
       type: "object",
       properties: {
         id: {
           type: "string",
-          description: "ID único del documento o item a obtener",
+          description:
+            "ID único del documento, platillo, orden o item que se desea obtener en detalle.",
         },
       },
       required: ["id"],
@@ -146,41 +191,47 @@ const TOOLS_DEFINITIONS = [
   {
     name: "consultar_restaurantes",
     description:
-      "Consultar restaurantes en la base de datos con filtros opcionales como nombre, calificación, métodos de pago, etc.",
+      "Consulta restaurantes en la base de datos con múltiples filtros opcionales: nombre parcial, nombre de categoría, rango de calificación, método de pago, modo de servicio, ID específico y límite de resultados. La respuesta es un array JSON de restaurantes con todos sus datos relevantes. Úsalo para mostrar listados, buscar restaurantes por criterios o ver detalles de uno específico.",
     inputSchema: {
       type: "object",
       properties: {
         name: {
           type: "string",
-          description: "Buscar por nombre del restaurante (búsqueda parcial)",
+          description:
+            "Nombre parcial del restaurante para búsqueda (ej: 'Pizza', 'Sushi').",
         },
         category_name: {
           type: "string",
-          description: "Filtrar por nombre de categoría específica",
+          description:
+            "Nombre de la categoría para filtrar restaurantes (ej: 'Mexicano', 'Italiano').",
         },
         rating_min: {
           type: "number",
-          description: "Calificación mínima (0-5)",
+          description: "Calificación mínima (0-5) para filtrar restaurantes.",
         },
         rating_max: {
           type: "number",
-          description: "Calificación máxima (0-5)",
+          description: "Calificación máxima (0-5) para filtrar restaurantes.",
         },
         payment_method: {
           type: "string",
-          description: "Filtrar por método de pago específico",
+          description:
+            "Método de pago aceptado por el restaurante (ej: 'tarjeta', 'efectivo').",
         },
         service_mode: {
           type: "string",
-          description: "Filtrar por modo de servicio específico",
+          description:
+            "Modo de servicio ofrecido (ej: 'para llevar', 'a domicilio').",
         },
         restaurant_id: {
           type: "string",
-          description: "Obtener un restaurante específico por su ID único",
+          description:
+            "ID único del restaurante para obtener solo ese restaurante.",
         },
         limit: {
           type: "number",
-          description: "Límite de resultados a devolver (por defecto 10)",
+          description:
+            "Cantidad máxima de restaurantes a devolver (por defecto 10).",
         },
       },
     },
