@@ -42,17 +42,17 @@ function calculateHaversineDistance(
   const R = 6371; // Radio de la Tierra en km
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
-  
+
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * (Math.PI / 180)) *
       Math.cos(lat2 * (Math.PI / 180)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
-  
+
   return Math.round(distance * 100) / 100; // Redondear a 2 decimales
 }
 
@@ -84,7 +84,8 @@ async function getNearbyRestaurants({
     const supabase = getSupabaseClient();
     const { data: restaurants, error } = await supabase
       .from("restaurants")
-      .select(`
+      .select(
+        `
         id,
         nombre,
         descripcion,
@@ -98,7 +99,8 @@ async function getNearbyRestaurants({
         latitude,
         longitude,
         categories!inner(nombre)
-      `)
+      `
+      )
       .eq("activo", true)
       .not("latitude", "is", null)
       .not("longitude", "is", null);
@@ -138,8 +140,14 @@ async function getNearbyRestaurants({
           distance_km: distance,
         };
       })
-      .filter((restaurant: RestaurantWithDistance) => restaurant.distance_km <= radius_km)
-      .sort((a: RestaurantWithDistance, b: RestaurantWithDistance) => a.distance_km - b.distance_km)
+      .filter(
+        (restaurant: RestaurantWithDistance) =>
+          restaurant.distance_km <= radius_km
+      )
+      .sort(
+        (a: RestaurantWithDistance, b: RestaurantWithDistance) =>
+          a.distance_km - b.distance_km
+      )
       .slice(0, limit);
 
     return restaurantsWithDistance;
@@ -158,7 +166,7 @@ async function getNearbyRestaurantsForMCP(
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     const restaurants = await getNearbyRestaurants(params);
-    
+
     return {
       content: [
         {

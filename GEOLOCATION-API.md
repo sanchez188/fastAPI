@@ -1,11 +1,13 @@
 # 🌍 API de Geolocalización - Restaurantes Cercanos
 
 ## Descripción
+
 Nueva funcionalidad que permite buscar restaurantes cercanos a una ubicación específica usando coordenadas geográficas (latitud/longitud) y cálculo de distancia con la fórmula de Haversine.
 
 ## 🚀 Funcionalidad Dual
 
 ### 1. 🔧 Herramienta MCP: `restaurantes_cercanos`
+
 **Para uso con clientes MCP (Model Context Protocol)**
 
 ```json
@@ -24,12 +26,14 @@ Nueva funcionalidad que permite buscar restaurantes cercanos a una ubicación es
 ```
 
 **Parámetros:**
+
 - `latitude` (requerido): Latitud entre -90 y 90 grados
-- `longitude` (requerido): Longitud entre -180 y 180 grados  
+- `longitude` (requerido): Longitud entre -180 y 180 grados
 - `radius_km` (opcional): Radio en kilómetros (0.1-100, por defecto 10)
 - `limit` (opcional): Máximo restaurantes (1-50, por defecto 20)
 
 ### 2. 🌐 Endpoint REST: `GET /api/restaurants/nearby`
+
 **Para llamadas HTTP directas**
 
 ```bash
@@ -37,7 +41,8 @@ curl "https://fastapi-2ifl.onrender.com/api/restaurants/nearby?latitude=9.9281&l
 ```
 
 **Query Parameters:**
-- `latitude` (requerido): Latitud de la ubicación 
+
+- `latitude` (requerido): Latitud de la ubicación
 - `longitude` (requerido): Longitud de la ubicación
 - `radius_km` (opcional): Radio de búsqueda en km
 - `limit` (opcional): Número máximo de resultados
@@ -67,7 +72,7 @@ Ambas opciones devuelven la misma estructura de datos:
         "distance_km": 2.45,
         "calificacion": 4.5,
         "latitude": 9.9301,
-        "longitude": -84.0850,
+        "longitude": -84.085,
         "horario_atencion": "11:00-22:00",
         "metodos_pago": ["efectivo", "tarjeta"],
         "modos_servicio": ["para llevar", "a domicilio"]
@@ -80,12 +85,14 @@ Ambas opciones devuelven la misma estructura de datos:
 ## 🛠️ Otros Endpoints de Restaurantes
 
 ### Listar Restaurantes
+
 ```bash
 GET /api/restaurants
 GET /api/restaurants?category_name=Mexicano&rating_min=4.0
 ```
 
 ### Obtener Restaurante por ID
+
 ```bash
 GET /api/restaurants/{id}
 ```
@@ -99,12 +106,15 @@ function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radio de la Tierra en km
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
-  
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distancia en km
 }
 ```
@@ -112,22 +122,24 @@ function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
 ## 🎯 Casos de Uso
 
 ### Para Apps Móviles
+
 ```javascript
 // Obtener ubicación del usuario
 navigator.geolocation.getCurrentPosition(async (position) => {
   const { latitude, longitude } = position.coords;
-  
+
   const response = await fetch(
     `https://fastapi-2ifl.onrender.com/api/restaurants/nearby?latitude=${latitude}&longitude=${longitude}&radius_km=5`
   );
   const data = await response.json();
-  
+
   // Mostrar restaurantes cercanos
   displayNearbyRestaurants(data.data.restaurantes);
 });
 ```
 
 ### Para Clientes MCP
+
 ```json
 {
   "tool": "restaurantes_cercanos",
@@ -157,5 +169,6 @@ navigator.geolocation.getCurrentPosition(async (position) => {
 - ✅ **Información completa**: Distancia, categoría, contacto
 
 ## 🔧 URL Base
+
 **Producción**: `https://fastapi-2ifl.onrender.com`
 **MCP Server**: Disponible en el plugin MCP integrado

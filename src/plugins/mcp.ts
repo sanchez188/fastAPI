@@ -344,14 +344,16 @@ const TOOLS_DEFINITIONS = [
           minimum: 0.1,
           maximum: 100,
           default: 10,
-          description: "Radio de búsqueda en kilómetros (por defecto 10km, máximo 100km).",
+          description:
+            "Radio de búsqueda en kilómetros (por defecto 10km, máximo 100km).",
         },
         limit: {
           type: "number",
           minimum: 1,
           maximum: 50,
           default: 20,
-          description: "Número máximo de restaurantes a devolver (por defecto 20).",
+          description:
+            "Número máximo de restaurantes a devolver (por defecto 20).",
         },
       },
       required: ["latitude", "longitude"],
