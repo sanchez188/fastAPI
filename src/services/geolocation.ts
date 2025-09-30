@@ -87,21 +87,23 @@ async function getNearbyRestaurants({
       .select(
         `
         id,
-        nombre,
-        descripcion,
-        direccion,
-        telefono,
-        horario_atencion,
-        metodos_pago,
-        modos_servicio,
-        calificacion,
-        activo,
+        name,
+        description,
+        address,
+        phone,
+        opening_hours,
+        payment_methods,
+        service_modes,
+        rating,
+        active,
         latitude,
         longitude,
-        categories!inner(nombre)
+        categories:category_id (
+          name
+        )
       `
       )
-      .eq("activo", true)
+      .eq("active", true)
       .not("latitude", "is", null)
       .not("longitude", "is", null);
 
@@ -125,16 +127,16 @@ async function getNearbyRestaurants({
 
         return {
           id: restaurant.id,
-          nombre: restaurant.nombre,
-          categoria: restaurant.categories?.nombre || "Sin categoría",
-          descripcion: restaurant.descripcion,
-          direccion: restaurant.direccion,
-          telefono: restaurant.telefono,
-          horario_atencion: restaurant.horario_atencion,
-          metodos_pago: restaurant.metodos_pago || [],
-          modos_servicio: restaurant.modos_servicio || [],
-          calificacion: restaurant.calificacion,
-          activo: restaurant.activo,
+          nombre: restaurant.name,
+          categoria: restaurant.categories?.name || "Sin categoría",
+          descripcion: restaurant.description,
+          direccion: restaurant.address,
+          telefono: restaurant.phone,
+          horario_atencion: restaurant.opening_hours,
+          metodos_pago: restaurant.payment_methods || [],
+          modos_servicio: restaurant.service_modes || [],
+          calificacion: restaurant.rating,
+          activo: restaurant.active,
           latitude: restaurant.latitude,
           longitude: restaurant.longitude,
           distance_km: distance,
