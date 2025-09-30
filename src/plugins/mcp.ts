@@ -123,11 +123,13 @@ const TOOLS_DEFINITIONS = [
         },
         restaurant_id: {
           type: "string",
-          description: "ID del restaurante (opcional, si la app ya trae el contexto).",
+          description:
+            "ID del restaurante (opcional, si la app ya trae el contexto).",
         },
         restaurant_name: {
           type: "string",
-          description: "Nombre del restaurante (opcional, si la app ya trae el contexto).",
+          description:
+            "Nombre del restaurante (opcional, si la app ya trae el contexto).",
         },
       },
       required: ["cedula", "telefono", "items"],
@@ -289,7 +291,8 @@ const TOOLS_DEFINITIONS = [
         },
         restaurant_id: {
           type: "string",
-          description: "ID del restaurante (opcional, para validar disponibilidad).",
+          description:
+            "ID del restaurante (opcional, para validar disponibilidad).",
         },
       },
       required: ["items"],
@@ -305,14 +308,53 @@ const TOOLS_DEFINITIONS = [
         id_items: {
           type: "array",
           items: { type: "string" },
-          description: "Array de IDs de platillos para verificar disponibilidad.",
+          description:
+            "Array de IDs de platillos para verificar disponibilidad.",
         },
         restaurant_id: {
           type: "string",
-          description: "ID del restaurante (opcional, para validar disponibilidad específica).",
+          description:
+            "ID del restaurante (opcional, para validar disponibilidad específica).",
         },
       },
       required: ["id_items"],
+    },
+  },
+  {
+    name: "restaurantes_cercanos",
+    description:
+      "Busca restaurantes cercanos a una ubicación específica. Recibe latitud, longitud y radio de búsqueda, calcula la distancia usando coordenadas geográficas y devuelve restaurantes ordenados por proximidad. Útil para mostrar restaurantes disponibles en el área del usuario.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        latitude: {
+          type: "number",
+          minimum: -90,
+          maximum: 90,
+          description: "Latitud de la ubicación del usuario (ej: 9.9281).",
+        },
+        longitude: {
+          type: "number",
+          minimum: -180,
+          maximum: 180,
+          description: "Longitud de la ubicación del usuario (ej: -84.0907).",
+        },
+        radius_km: {
+          type: "number",
+          minimum: 0.1,
+          maximum: 100,
+          default: 10,
+          description: "Radio de búsqueda en kilómetros (por defecto 10km, máximo 100km).",
+        },
+        limit: {
+          type: "number",
+          minimum: 1,
+          maximum: 50,
+          default: 20,
+          description: "Número máximo de restaurantes a devolver (por defecto 20).",
+        },
+      },
+      required: ["latitude", "longitude"],
     },
   },
 ] as const;
@@ -491,7 +533,10 @@ async function handleFetch(id: string, fields?: string[]) {
 }
 
 // Función para cotizar orden
-async function handleCotizarOrden(args: { items: Array<{id_item: string, qty: number}>, restaurant_id?: string }) {
+async function handleCotizarOrden(args: {
+  items: Array<{ id_item: string; qty: number }>;
+  restaurant_id?: string;
+}) {
   try {
     const { menuService } = await import("../services/menu.js");
     let subtotal = 0;
@@ -507,7 +552,7 @@ async function handleCotizarOrden(args: { items: Array<{id_item: string, qty: nu
           nombre: menuItem.nombre,
           qty: item.qty,
           precio_unitario: menuItem.precio,
-          subtotal: itemSubtotal
+          subtotal: itemSubtotal,
         });
       } else {
         throw new Error(`Item no encontrado: ${item.id_item}`);
@@ -526,18 +571,25 @@ async function handleCotizarOrden(args: { items: Array<{id_item: string, qty: nu
             impuestos,
             total,
             items: itemsDetail,
-            moneda: "CRC"
+            moneda: "CRC",
           }),
         },
       ],
     };
   } catch (error) {
-    throw new Error(`Error cotizando orden: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Error cotizando orden: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 
 // Función para verificar disponibilidad de items
-async function handleDisponibilidadItems(args: { id_items: string[], restaurant_id?: string }) {
+async function handleDisponibilidadItems(args: {
+  id_items: string[];
+  restaurant_id?: string;
+}) {
   try {
     const { menuService } = await import("../services/menu.js");
     const disponibilidad = [];
@@ -549,7 +601,7 @@ async function handleDisponibilidadItems(args: { id_items: string[], restaurant_
         disponible: !!menuItem,
         nombre: menuItem?.nombre || "Item no encontrado",
         tiempo_preparacion: menuItem ? "15-20 min" : null, // Valor ejemplo
-        stock_disponible: menuItem ? true : false
+        stock_disponible: menuItem ? true : false,
       });
     }
 
@@ -562,7 +614,30 @@ async function handleDisponibilidadItems(args: { id_items: string[], restaurant_
       ],
     };
   } catch (error) {
-    throw new Error(`Error verificando disponibilidad: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Error verificando disponibilidad: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
+// Función para buscar restaurantes cercanos
+async function handleRestaurantesCercanos(args: {
+  latitude: number;
+  longitude: number;
+  radius_km?: number;
+  limit?: number;
+}) {
+  try {
+    const { geolocationService } = await import("../services/geolocation.js");
+    return await geolocationService.getNearbyRestaurantsForMCP(args);
+  } catch (error) {
+    throw new Error(
+      `Error buscando restaurantes cercanos: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
   }
 }
 
@@ -644,6 +719,11 @@ async function mcpPlugin(fastify: FastifyInstance) {
             if (!args || !(args as any).id_items)
               throw new Error("Se requiere una lista de IDs de items");
             return await handleDisponibilidadItems(args as any);
+
+          case "restaurantes_cercanos":
+            if (!args || !(args as any).latitude || !(args as any).longitude)
+              throw new Error("Se requieren latitud y longitud");
+            return await handleRestaurantesCercanos(args as any);
 
           default:
             throw new Error(`Herramienta desconocida: ${name}`);

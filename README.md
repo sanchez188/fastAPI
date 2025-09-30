@@ -20,7 +20,9 @@ src/
 │   └── restaurant.ts    # Datos del restaurante
 ├── 📁 services/         # Lógica de negocio
 │   ├── menu.ts          # Servicio de menú
-│   └── orders.ts        # Servicio de órdenes
+│   ├── orders.ts        # Servicio de órdenes
+│   ├── restaurants.ts   # Servicio de restaurantes
+│   └── geolocation.ts   # Servicio de geolocalización
 ├── 📁 tools/            # Herramientas MCP
 │   ├── menu-tools.ts    # Herramientas de menú
 │   ├── order-tools.ts   # Herramientas de órdenes
@@ -28,6 +30,9 @@ src/
 ├── 📁 plugins/          # Plugins Fastify
 │   └── mcp.ts           # Plugin MCP
 ├── 📁 routes/           # Rutas HTTP
+│   ├── health.ts        # Health check
+│   ├── mcp.ts           # Rutas MCP
+│   └── restaurants.ts   # API REST de restaurantes
 │   ├── mcp.ts           # Endpoint MCP
 │   └── health.ts        # Health checks
 └── 🚀 server.ts         # Servidor principal
@@ -88,18 +93,44 @@ docker run -p 3000:3000 --env-file .env sumo-sushi-mcp
 
 ## 📡 API Endpoints
 
+### Principales
 - `GET /` - Homepage con información del restaurante
 - `GET /health` - Health check del servidor
 - `POST /mcp` - Endpoint principal MCP
 
+### 🌍 API REST de Restaurantes
+- `GET /api/restaurants/nearby` - **🆕 Buscar restaurantes cercanos por geolocalización**
+- `GET /api/restaurants` - Listar restaurantes con filtros
+- `GET /api/restaurants/:id` - Obtener restaurante específico
+
+#### Ejemplo: Restaurantes Cercanos
+```bash
+curl "https://fastapi-2ifl.onrender.com/api/restaurants/nearby?latitude=9.9281&longitude=-84.0907&radius_km=10&limit=20"
+```
+
 ## 🍣 Herramientas MCP Disponibles
 
+### 🔧 Consultas y Gestión
 1. **consulta_mesero** - Consultas generales sobre el restaurante
-2. **buscar_menu** - Búsqueda de items del menú
-3. **crear_orden** - Crear nuevos pedidos
-4. **consultar_ordenes_por_cedula** - Consultar órdenes existentes
-5. **cancelar_por_cedula** - Cancelar órdenes
-6. **get_restaurant_info** - Información del restaurante
+2. **buscar_menu** - Búsqueda de items del menú con filtros
+3. **consultar_restaurantes** - Listar restaurantes con filtros múltiples
+
+### 📦 Gestión de Órdenes
+4. **crear_orden** - Crear nuevos pedidos
+5. **consultar_ordenes_por_cedula** - Consultar órdenes existentes  
+6. **cancelar_por_cedula** - Cancelar órdenes
+7. **cotizar_orden** - Calcular total antes de crear orden
+8. **disponibilidad_items** - Verificar stock de platillos
+
+### 🌍 Geolocalización (NUEVO)
+9. **restaurantes_cercanos** - **🆕 Buscar restaurantes por ubicación GPS**
+
+### 🔍 Estándar MCP
+10. **search** - Búsqueda general en el sistema
+11. **fetch** - Obtener contenido específico por ID
+
+#### 🌟 Funcionalidad Dual: MCP + REST
+La herramienta `restaurantes_cercanos` también está disponible como endpoint REST en `/api/restaurants/nearby` para uso directo desde apps web/móviles.
 
 ## 🔧 Variables de Entorno
 

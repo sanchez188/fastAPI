@@ -11,6 +11,7 @@ import mcpPlugin from "./plugins/mcp.js";
 // Importar rutas modulares
 import mcpRoute from "./routes/mcp.js";
 import healthRoute from "./routes/health.js";
+import restaurantRoutes from "./routes/restaurants.js";
 
 const fastify = Fastify({
   logger: {
@@ -40,6 +41,7 @@ async function startServer() {
     // Registrar rutas modulares
     await fastify.register(healthRoute);
     await fastify.register(mcpRoute);
+    await fastify.register(restaurantRoutes, { prefix: "/api/restaurants" });
 
     // Configurar puerto
     const port = parseInt(process.env.PORT || "3000");
