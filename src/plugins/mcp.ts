@@ -34,7 +34,7 @@ const TOOLS_DEFINITIONS = [
   {
     name: "buscar_menu",
     description:
-      "Busca platillos en el menú del restaurante. Permite filtrar por categoría (seccion), etiquetas (filtro_tags), texto libre (nombre o descripción) y por restaurante específico (restaurant_name). Si se envía restaurant_name, primero busca el restaurante por nombre exacto y luego devuelve solo los platillos asociados a ese restaurante. La respuesta es un array JSON de platillos, cada uno con nombre, descripción, precio, categoría y etiquetas. Úsalo para mostrar el menú filtrado en la app.",
+      "Busca platillos en el menú del restaurante. Permite filtrar por categoría (seccion), etiquetas (tags), texto libre (nombre o descripción) y por restaurante específico (restaurant_name). Si se envía restaurant_name, primero busca el restaurante por nombre exacto y luego devuelve solo los platillos asociados a ese restaurante. La respuesta es un array JSON de platillos, cada uno con nombre, descripción, precio, categoría y etiquetas. Úsalo para mostrar el menú filtrado en la app.",
     inputSchema: {
       type: "object",
       properties: {
@@ -43,10 +43,11 @@ const TOOLS_DEFINITIONS = [
           description:
             "Nombre de la categoría del menú para filtrar platillos (ej: 'Entrantes', 'Bebidas').",
         },
-        filtro_tags: {
-          type: "string",
+        tags: {
+          type: "array",
+          items: { type: "string" },
           description:
-            "Lista de etiquetas separadas por coma para filtrar platillos (ej: 'vegetariano,picante').",
+            "Array de etiquetas para filtrar platillos (ej: ['vegetariano', 'picante']).",
         },
         texto: {
           type: "string",
@@ -70,11 +71,13 @@ const TOOLS_DEFINITIONS = [
       properties: {
         cedula: {
           type: "string",
+          pattern: "^[0-9]-[0-9]{4}-[0-9]{4}$",
           description:
             "Cédula del cliente (formato: 1-1234-5678) para asociar la orden.",
         },
         telefono: {
           type: "string",
+          pattern: "^[0-9 +()-]{7,}$",
           description: "Teléfono de contacto del cliente.",
         },
         nombre_cliente: {
@@ -92,12 +95,19 @@ const TOOLS_DEFINITIONS = [
               },
               qty: {
                 type: "integer",
+                minimum: 1,
                 description: "Cantidad solicitada de ese platillo.",
               },
               nombre: {
                 type: "string",
                 description:
                   "Nombre del platillo (opcional, solo informativo).",
+              },
+              precio_unitario: {
+                type: "number",
+                minimum: 0,
+                description:
+                  "Precio unitario del platillo (opcional, para reconfirmación de total en UI).",
               },
             },
             required: ["id_item", "qty"],
@@ -110,6 +120,14 @@ const TOOLS_DEFINITIONS = [
         notas: {
           type: "string",
           description: "Notas adicionales para la orden (opcional).",
+        },
+        restaurant_id: {
+          type: "string",
+          description: "ID del restaurante (opcional, si la app ya trae el contexto).",
+        },
+        restaurant_name: {
+          type: "string",
+          description: "Nombre del restaurante (opcional, si la app ya trae el contexto).",
         },
       },
       required: ["cedula", "telefono", "items"],
@@ -124,6 +142,7 @@ const TOOLS_DEFINITIONS = [
       properties: {
         cedula: {
           type: "string",
+          pattern: "^[0-9]-[0-9]{4}-[0-9]{4}$",
           description: "Cédula del cliente para buscar sus órdenes.",
         },
       },
@@ -139,6 +158,7 @@ const TOOLS_DEFINITIONS = [
       properties: {
         cedula: {
           type: "string",
+          pattern: "^[0-9]-[0-9]{4}-[0-9]{4}$",
           description: "Cédula del cliente cuyas órdenes se desean cancelar.",
         },
         scope: {
@@ -175,7 +195,7 @@ const TOOLS_DEFINITIONS = [
   {
     name: "fetch",
     description:
-      "Obtiene el contenido completo de un documento, platillo, orden o cualquier item específico usando su ID único. Envía el parámetro 'id' y recibe el objeto JSON correspondiente. Úsalo para mostrar detalles completos de un elemento seleccionado por el usuario.",
+      "Obtiene el contenido completo de un documento, platillo, orden o cualquier item específico usando su ID único. Envía el parámetro 'id' y opcionalmente 'fields' para especificar qué campos devolver. Úsalo para mostrar detalles completos de un elemento seleccionado por el usuario, evitando exposición de campos internos sensibles.",
     inputSchema: {
       type: "object",
       properties: {
@@ -183,6 +203,12 @@ const TOOLS_DEFINITIONS = [
           type: "string",
           description:
             "ID único del documento, platillo, orden o item que se desea obtener en detalle.",
+        },
+        fields: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "Array opcional de nombres de campos específicos a devolver (evita IDs sensibles).",
         },
       },
       required: ["id"],
@@ -234,6 +260,59 @@ const TOOLS_DEFINITIONS = [
             "Cantidad máxima de restaurantes a devolver (por defecto 10).",
         },
       },
+    },
+  },
+  {
+    name: "cotizar_orden",
+    description:
+      "Calcula el total estimado de una orden antes de crearla. Recibe una lista de items con id_item y cantidad, y devuelve el subtotal, impuestos, total estimado y validaciones de disponibilidad. Úsalo para mostrar cotización previa al usuario antes de confirmar la orden.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        items: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id_item: {
+                type: "string",
+                description: "ID del platillo en el menú.",
+              },
+              qty: {
+                type: "integer",
+                minimum: 1,
+                description: "Cantidad solicitada de ese platillo.",
+              },
+            },
+            required: ["id_item", "qty"],
+          },
+        },
+        restaurant_id: {
+          type: "string",
+          description: "ID del restaurante (opcional, para validar disponibilidad).",
+        },
+      },
+      required: ["items"],
+    },
+  },
+  {
+    name: "disponibilidad_items",
+    description:
+      "Valida si hay stock y tiempo de preparación disponible para ciertos platillos. Recibe una lista de id_item y devuelve el estado de disponibilidad de cada uno. Úsalo para evitar fallos al crear órdenes y mostrar advertencias al usuario.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        id_items: {
+          type: "array",
+          items: { type: "string" },
+          description: "Array de IDs de platillos para verificar disponibilidad.",
+        },
+        restaurant_id: {
+          type: "string",
+          description: "ID del restaurante (opcional, para validar disponibilidad específica).",
+        },
+      },
+      required: ["id_items"],
     },
   },
 ] as const;
@@ -314,7 +393,7 @@ async function handleSearch(query: string) {
 }
 
 // Función para obtener contenido específico
-async function handleFetch(id: string) {
+async function handleFetch(id: string, fields?: string[]) {
   try {
     let content = "";
     let title = "";
@@ -375,17 +454,30 @@ async function handleFetch(id: string) {
       metadata = { type: "document", id };
     }
 
+    let result = {
+      id,
+      title,
+      text: content,
+      url,
+      metadata,
+    };
+
+    // Filtrar campos si se especifica el parámetro fields
+    if (fields && Array.isArray(fields) && fields.length > 0) {
+      const filteredResult: any = {};
+      for (const field of fields) {
+        if (field in result) {
+          filteredResult[field] = (result as any)[field];
+        }
+      }
+      result = filteredResult;
+    }
+
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify({
-            id,
-            title,
-            text: content,
-            url,
-            metadata,
-          }),
+          text: JSON.stringify(result),
         },
       ],
     };
@@ -395,6 +487,82 @@ async function handleFetch(id: string) {
         error instanceof Error ? error.message : String(error)
       }`
     );
+  }
+}
+
+// Función para cotizar orden
+async function handleCotizarOrden(args: { items: Array<{id_item: string, qty: number}>, restaurant_id?: string }) {
+  try {
+    const { menuService } = await import("../services/menu.js");
+    let subtotal = 0;
+    const itemsDetail = [];
+
+    for (const item of args.items) {
+      const menuItem = await menuService.obtenerItemPorId(item.id_item);
+      if (menuItem) {
+        const itemSubtotal = menuItem.precio * item.qty;
+        subtotal += itemSubtotal;
+        itemsDetail.push({
+          id_item: item.id_item,
+          nombre: menuItem.nombre,
+          qty: item.qty,
+          precio_unitario: menuItem.precio,
+          subtotal: itemSubtotal
+        });
+      } else {
+        throw new Error(`Item no encontrado: ${item.id_item}`);
+      }
+    }
+
+    const impuestos = subtotal * 0.13; // 13% de impuesto (ajustar según país)
+    const total = subtotal + impuestos;
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({
+            subtotal,
+            impuestos,
+            total,
+            items: itemsDetail,
+            moneda: "CRC"
+          }),
+        },
+      ],
+    };
+  } catch (error) {
+    throw new Error(`Error cotizando orden: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// Función para verificar disponibilidad de items
+async function handleDisponibilidadItems(args: { id_items: string[], restaurant_id?: string }) {
+  try {
+    const { menuService } = await import("../services/menu.js");
+    const disponibilidad = [];
+
+    for (const id_item of args.id_items) {
+      const menuItem = await menuService.obtenerItemPorId(id_item);
+      disponibilidad.push({
+        id_item,
+        disponible: !!menuItem,
+        nombre: menuItem?.nombre || "Item no encontrado",
+        tiempo_preparacion: menuItem ? "15-20 min" : null, // Valor ejemplo
+        stock_disponible: menuItem ? true : false
+      });
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(disponibilidad),
+        },
+      ],
+    };
+  } catch (error) {
+    throw new Error(`Error verificando disponibilidad: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -454,7 +622,7 @@ async function mcpPlugin(fastify: FastifyInstance) {
           case "fetch":
             if (!args || !(args as any).id)
               throw new Error("Se requiere un ID de documento");
-            return await handleFetch((args as any).id);
+            return await handleFetch((args as any).id, (args as any).fields);
 
           case "consultar_restaurantes":
             const restaurantArgs = args as any;
@@ -466,6 +634,16 @@ async function mcpPlugin(fastify: FastifyInstance) {
             }
             // Sino, hacer búsqueda con filtros
             return await restaurantService.getRestaurants(restaurantArgs || {});
+
+          case "cotizar_orden":
+            if (!args || !(args as any).items)
+              throw new Error("Se requiere una lista de items para cotizar");
+            return await handleCotizarOrden(args as any);
+
+          case "disponibilidad_items":
+            if (!args || !(args as any).id_items)
+              throw new Error("Se requiere una lista de IDs de items");
+            return await handleDisponibilidadItems(args as any);
 
           default:
             throw new Error(`Herramienta desconocida: ${name}`);

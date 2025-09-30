@@ -6,6 +6,11 @@ export class MenuTools {
   static async buscarMenu(args: any) {
     try {
       let items;
+      // Convertir tags de array a string si es necesario (compatibilidad retroactiva)
+      if (args.tags && Array.isArray(args.tags)) {
+        args.filtro_tags = args.tags.join(",");
+      }
+      
       // Si se envía restaurant_name, buscar el restaurante y filtrar por su id
       if (args.restaurant_name) {
         // Buscar restaurante por nombre exacto
