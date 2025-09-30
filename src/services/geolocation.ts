@@ -5,14 +5,12 @@ interface RestaurantWithDistance {
   id: string;
   nombre: string;
   categoria: string;
-  descripcion?: string;
   direccion?: string;
   telefono?: string;
   horario_atencion?: string;
   metodos_pago?: string[];
   modos_servicio?: string[];
   calificacion?: number;
-  activo: boolean;
   latitude: number;
   longitude: number;
   distance_km: number;
@@ -84,28 +82,23 @@ async function getNearbyRestaurants({
     const supabase = getSupabaseClient();
     const { data: restaurants, error } = await supabase
       .from("restaurants")
-      .select(
-        `
+      .select(`
         id,
         name,
-        description,
         address,
         phone,
         opening_hours,
         payment_methods,
         service_modes,
         rating,
-        active,
-        latitude,
-        longitude,
+        lat,
+        long,
         categories:category_id (
           name
         )
-      `
-      )
-      .eq("active", true)
-      .not("latitude", "is", null)
-      .not("longitude", "is", null);
+      `)
+      .not("lat", "is", null)
+      .not("long", "is", null);
 
     if (error) {
       throw new Error(`Error consultando restaurantes: ${error.message}`);
@@ -121,24 +114,22 @@ async function getNearbyRestaurants({
         const distance = calculateHaversineDistance(
           latitude,
           longitude,
-          restaurant.latitude,
-          restaurant.longitude
+          restaurant.lat,
+          restaurant.long
         );
 
         return {
           id: restaurant.id,
           nombre: restaurant.name,
           categoria: restaurant.categories?.name || "Sin categoría",
-          descripcion: restaurant.description,
           direccion: restaurant.address,
           telefono: restaurant.phone,
           horario_atencion: restaurant.opening_hours,
           metodos_pago: restaurant.payment_methods || [],
           modos_servicio: restaurant.service_modes || [],
           calificacion: restaurant.rating,
-          activo: restaurant.active,
-          latitude: restaurant.latitude,
-          longitude: restaurant.longitude,
+          latitude: restaurant.lat,
+          longitude: restaurant.long,
           distance_km: distance,
         };
       })
