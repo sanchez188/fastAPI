@@ -82,7 +82,8 @@ async function getNearbyRestaurants({
     const supabase = getSupabaseClient();
     const { data: restaurants, error } = await supabase
       .from("restaurants")
-      .select(`
+      .select(
+        `
         id,
         name,
         address,
@@ -96,7 +97,8 @@ async function getNearbyRestaurants({
         categories:category_id (
           name
         )
-      `)
+      `
+      )
       .not("lat", "is", null)
       .not("long", "is", null);
 
